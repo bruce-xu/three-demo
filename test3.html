@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>科技感炫酷大屏</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(#0a0a0a, #000000);
+      font-family: 'Segoe UI', sans-serif;
+      color: #00ffff;
+      overflow: hidden;
+    }
+
+    .screen-frame {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      right: 30px;
+      bottom: 30px;
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 30px #00ffffaa;
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    .glow-corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 10px #00ffff;
+    }
+
+    .top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
+    .top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
+    .bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
+    .bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+    .center-title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      letter-spacing: 3px;
+      color: #00eaff;
+      text-shadow: 0 0 10px #00eaffaa;
+    }
+
+    .content-area {
+      position: absolute;
+      top: 80px;
+      bottom: 40px;
+      left: 40px;
+      right: 40px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px dashed #00ffff55;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .info-box {
+      position: absolute;
+      width: 220px;
+      height: 100px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #00ffff44;
+      border-radius: 8px;
+      box-shadow: 0 0 12px #00ffff33 inset;
+      color: #00ffff;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .info-box.top-left { top: 50px; left: 50px; }
+    .info-box.top-right { top: 50px; right: 50px; }
+    .info-box.bottom-left { bottom: 50px; left: 50px; }
+    .info-box.bottom-right { bottom: 50px; right: 50px; }
+  </style>
+</head>
+<body>
+  <div class="screen-frame">
+    <div class="glow-corner top-left"></div>
+    <div class="glow-corner top-right"></div>
+    <div class="glow-corner bottom-left"></div>
+    <div class="glow-corner bottom-right"></div>
+  </div>
+
+  <div class="center-title">数字孪生·煤场管理平台</div>
+
+  <div class="content-area">
+    <!-- 可放入 Three.js、Echarts、视频流 等内容 -->
+  </div>
+
+  <div class="info-box top-left">告警区域</div>
+  <div class="info-box top-right">环境传感器</div>
+  <div class="info-box bottom-left">系统状态</div>
+  <div class="info-box bottom-right">实时数据</div>
+</body>
+</html>

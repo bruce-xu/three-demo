@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未来科技数据大屏</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #0c1a2e, #0a1128);
+            color: #e0f7ff;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        /* 大标题样式 */
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+            margin-bottom: 10px;
+            animation: titleGlow 3s infinite alternate;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a3d5ff;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+        
+        /* 面板网格布局 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto 1fr 1fr;
+            gap: 20px;
+            height: calc(100% - 100px);
+        }
+        
+        /* 面板通用样式 */
+        .panel {
+            background: rgba(10, 25, 47, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(64, 224, 208, 0.2);
+        }
+        
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0, 242, 254, 0.3);
+        }
+        
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f2fe, transparent);
+            animation: scanline 3s infinite linear;
+        }
+        
+        .panel-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            color: #00f2fe;
+        }
+        
+        .panel-content {
+            padding: 15px;
+            height: calc(100% - 55px);
+        }
+        
+        /* 特殊面板样式 */
+        .panel-1 { grid-column: 1; grid-row: 1; }
+        .panel-2 { grid-column: 2; grid-row: 1; }
+        .panel-3 { grid-column: 3; grid-row: 1; }
+        .panel-4 { grid-column: 4; grid-row: 1; }
+        .panel-5 { grid-column: 1 / span 2; grid-row: 2 / span 2; }
+        .panel-6 { grid-column: 3 / span 2; grid-row: 2; }
+        .panel-7 { grid-column: 3; grid-row: 3; }
+        .panel-8 { grid-column: 4; grid-row: 3; }
+        
+        /* 3D地球容器 */
+        #globe-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 数据卡片样式 */
+        .data-card {
+            background: rgba(16, 42, 67, 0.5);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00f2fe;
+        }
+        
+        .data-card:last-child {
+            margin-bottom: 0;
+        }
+        
+        .data-title {
+            font-size: 0.9rem;
+            color: #a3d5ff;
+            margin-bottom: 8px;
+        }
+        
+        .data-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .data-unit {
+            font-size: 0.9rem;
+            color: #4facfe;
+            margin-left: 5px;
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 装饰元素 */
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-width: 3px;
+            border-style: solid;
+        }
+        
+        .corner-tl {
+            top: 0;
+            left: 0;
+            border-color: #00f2fe transparent transparent #00f2fe;
+        }
+        
+        .corner-tr {
+            top: 0;
+            right: 0;
+            border-color: #00f2fe #00f2fe transparent transparent;
+        }
+        
+        .corner-bl {
+            bottom: 0;
+            left: 0;
+            border-color: transparent transparent #00f2fe #00f2fe;
+        }
+        
+        .corner-br {
+            bottom: 0;
+            right: 0;
+            border-color: transparent #00f2fe #00f2fe transparent;
+        }
+        
+        /* 动画效果 */
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 15px rgba(79, 172, 254, 0.5); }
+            100% { text-shadow: 0 0 30px rgba(79, 172, 254, 0.8), 0 0 60px rgba(79, 172, 254, 0.6); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        
+        /* 底部状态栏 */
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 25, 47, 0.8);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(64, 224, 208, 0.2);
+            font-size: 0.9rem;
+            color: #a3d5ff;
+        }
+        
+        .update-time {
+            color: #00f2fe;
+            font-weight: 600;
+        }
+        
+        /* 粒子背景 */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">智能数据监控平台</h1>
+            <div class="subtitle">实时数据监测与分析系统 | 最后更新: <span id="update-time">--:--:--</span></div>
+        </div>
+        
+        <div class="dashboard">
+            <!-- 顶部四个小面板 -->
+            <div class="panel panel-1">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>📊</i> 访问总量
+                    </div>
+                    <div class="panel-icon">🚀</div>
+                </div>
+                <div class="panel-content">
+                    <div class="data-card">
+                        <div class="data-title">今日访问量</div>
+                        <div class="data-value">24,587<span class="data-unit">次</span></div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-title">总访问量</div>
+                        <div class="data-value">1,842,963<span class="data-unit">次</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel panel-2">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>💹</i> 系统性能
+                    </div>
+                    <div class="panel-icon">⚙️</div>
+                </div>
+                <div class="panel-content">
+                    <div class="data-card">
+                        <div class="data-title">CPU使用率</div>
+                        <div class="data-value">42<span class="data-unit">%</span></div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-title">内存使用率</div>
+                        <div class="data-value">68<span class="data-unit">%</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel panel-3">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>🌐</i> 网络状态
+                    </div>
+                    <div class="panel-icon">📡</div>
+                </div>
+                <div class="panel-content">
+                    <div class="data-card">
+                        <div class="data-title">上行速度</div>
+                        <div class="data-value">124<span class="data-unit">Mbps</span></div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-title">下行速度</div>
+                        <div class="data-value">356<span class="data-unit">Mbps</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel panel-4">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>🔐</i> 安全状态
+                    </div>
+                    <div class="panel-icon">🛡️</div>
+                </div>
+                <div class="panel-content">
+                    <div class="data-card">
+                        <div class="data-title">威胁拦截</div>
+                        <div class="data-value">126<span class="data-unit">次</span></div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-title">安全评分</div>
+                        <div class="data-value">98<span class="data-unit">分</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中央3D地球 -->
+            <div class="panel panel-5">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>🌍</i> 全球数据节点分布
+                    </div>
+                    <div class="panel-icon">🛰️</div>
+                </div>
+                <div class="panel-content">
+                    <div id="globe-container"></div>
+                </div>
+            </div>
+            
+            <!-- 右侧两个图表 -->
+            <div class="panel panel-6">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>📈</i> 实时流量监控
+                    </div>
+                    <div class="panel-icon">🔍</div>
+                </div>
+                <div class="panel-content">
+                    <div id="line-chart" class="chart-container"></div>
+                </div>
+            </div>
+            
+            <div class="panel panel-7">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>🧩</i> 数据来源分布
+                    </div>
+                    <div class="panel-icon">📋</div>
+                </div>
+                <div class="panel-content">
+                    <div id="pie-chart" class="chart-container"></div>
+                </div>
+            </div>
+            
+            <div class="panel panel-8">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i>📊</i> 设备使用占比
+                    </div>
+                    <div class="panel-icon">📱</div>
+                </div>
+                <div class="panel-content">
+                    <div id="bar-chart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="system-status">系统状态: <span class="status-active">运行正常</span></div>
+            <div class="update-info">数据更新时间: <span class="update-time" id="current-time">--:--:--</span></div>
+            <div class="copyright">© 2023 未来科技数据平台 | 版本 2.1.5</div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 初始化粒子背景
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 120, density: { enable: true, value_area: 800 } },
+                color: { value: "#4facfe" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#00f2fe",
+                    opacity: 0.2,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: true,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+        
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            document.getElementById('update-time').textContent = timeStr;
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // 随机更新数据值
+        function updateDataValues() {
+            document.querySelectorAll('.data-value').forEach(el => {
+                const text = el.textContent;
+                const numMatch = text.match(/\d+/);
+                if (numMatch) {
+                    const num = parseInt(numMatch[0]);
+                    const newNum = Math.floor(num * (0.95 + Math.random() * 0.1));
+                    el.innerHTML = el.innerHTML.replace(num, newNum);
+                }
+            });
+        }
+        
+        setInterval(updateDataValues, 3000);
+        
+        // 创建3D地球
+        function initGlobe() {
+            const container = document.getElementById('globe-container');
+            
+            // 创建场景
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // 创建地球
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+            const material = new THREE.MeshPhongMaterial({ 
+                map: texture,
+                specular: new THREE.Color(0x00f2fe),
+                shininess: 10,
+                transparent: true,
+                opacity: 0.95
+            });
+            const earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+            
+            // 添加云层
+            const cloudGeometry = new THREE.SphereGeometry(5.05, 32, 32);
+            const cloudTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                map: cloudTexture,
+                transparent: true,
+                opacity: 0.4
+            });
+            const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            scene.add(clouds);
+            
+            // 添加光源
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+            sunLight.position.set(10, 5, 5);
+            scene.add(sunLight);
+            
+            // 添加光点
+            const points = [];
+            for (let i = 0; i < 100; i++) {
+                const phi = Math.acos(-1 + (2 * i) / 100);
+                const theta = Math.sqrt(100 * Math.PI) * phi;
+                
+                const point = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 8, 8),
+                    new THREE.MeshBasicMaterial({ color: 0x00f2fe })
+                );
+                
+                point.position.set(
+                    5.2 * Math.cos(theta) * Math.sin(phi),
+                    5.2 * Math.sin(theta) * Math.sin(phi),
+                    5.2 * Math.cos(phi)
+                );
+                
+                points.push(point);
+                scene.add(point);
+            }
+            
+            // 设置相机位置
+            camera.position.z = 15;
+            
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                earth.rotation.y += 0.002;
+                clouds.rotation.y += 0.003;
+                
+                // 让光点闪烁
+                points.forEach((point, i) => {
+                    const scale = 0.8 + 0.4 * Math.sin(Date.now() * 0.001 + i);
+                    point.scale.set(scale, scale, scale);
+                });
+                
+                renderer.render(scene, camera);
+            }
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            animate();
+        }
+        
+        // 初始化图表
+        function initCharts() {
+            // 折线图
+            const lineChart = echarts.init(document.getElementById('line-chart'));
+            const lineOption = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(10, 25, 47, 0.8)',
+                    borderColor: '#00f2fe',
+                    textStyle: { color: '#e0f7ff' }
+                },
+                legend: {
+                    data: ['网络流量', '数据处理'],
+                    textStyle: { color: '#a3d5ff' },
+                    right: 10,
+                    top: 10
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    axisLine: { lineStyle: { color: '#4facfe' } },
+                    axisLabel: { color: '#a3d5ff' }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: { lineStyle: { color: '#4facfe' } },
+                    axisLabel: { color: '#a3d5ff' },
+                    splitLine: { lineStyle: { color: 'rgba(79, 172, 254, 0.1)' } }
+                },
+                series: [
+                    {
+                        name: '网络流量',
+                        type: 'line',
+                        smooth: true,
+                        data: [120, 182, 191, 234, 290, 330, 310],
+                        lineStyle: { color: '#00f2fe', width: 3 },
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        itemStyle: { color: '#00f2fe' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(0, 242, 254, 0.3)' },
+                                { offset: 1, color: 'rgba(0, 242, 254, 0.01)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: '数据处理',
+                        type: 'line',
+                        smooth: true,
+                        data: [80, 120, 101, 134, 190, 230, 280],
+                        lineStyle: { color: '#4facfe', width: 3 },
+                        symbol: 'circle',
+                        symbolSize: 8,
+                        itemStyle: { color: '#4facfe' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(79, 172, 254, 0.3)' },
+                                { offset: 1, color: 'rgba(79, 172, 254, 0.01)' }
+                            ])
+                        }
+                    }
+                ]
+            };
+            lineChart.setOption(lineOption);
+            
+            // 饼图
+            const pieChart = echarts.init(document.getElementById('pie-chart'));
+            const pieOption = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(10, 25, 47, 0.8)',
+                    borderColor: '#00f2fe',
+                    textStyle: { color: '#e0f7ff' }
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    textStyle: { color: '#a3d5ff' }
+                },
+                series: [
+                    {
+                        name: '数据来源',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        center: ['40%', '50%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#0c1a2e',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '18',
+                                fontWeight: 'bold',
+                                color: '#e0f7ff'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            { value: 1048, name: '移动端', itemStyle: { color: '#00f2fe' } },
+                            { value: 735, name: '桌面端', itemStyle: { color: '#4facfe' } },
+                            { value: 580, name: 'API接口', itemStyle: { color: '#9a7bff' } },
+                            { value: 484, name: '传感器', itemStyle: { color: '#ff7eb9' } },
+                            { value: 300, name: '其他', itemStyle: { color: '#ff9a76' } }
+                        ]
+                    }
+                ]
+            };
+            pieChart.setOption(pieOption);
+            
+            // 柱状图
+            const barChart = echarts.init(document.getElementById('bar-chart'));
+            const barOption = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    backgroundColor: 'rgba(10, 25, 47, 0.8)',
+                    borderColor: '#00f2fe',
+                    textStyle: { color: '#e0f7ff' }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['手机', '平板', '笔记本', '台式机', '其他'],
+                    axisLine: { lineStyle: { color: '#4facfe' } },
+                    axisLabel: { color: '#a3d5ff', interval: 0 }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: { lineStyle: { color: '#4facfe' } },
+                    axisLabel: { color: '#a3d5ff' },
+                    splitLine: { lineStyle: { color: 'rgba(79, 172, 254, 0.1)' } }
+                },
+                series: [
+                    {
+                        name: '设备占比',
+                        type: 'bar',
+                        barWidth: '40%',
+                        data: [620, 332, 701, 434, 290],
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#00f2fe' },
+                                { offset: 1, color: '#4facfe' }
+                            ]),
+                            borderRadius: [5, 5, 0, 0]
+                        }
+                    }
+                ]
+            };
+            barChart.setOption(barOption);
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', () => {
+                lineChart.resize();
+                pieChart.resize();
+                barChart.resize();
+            });
+        }
+        
+        // 初始化所有内容
+        window.addEventListener('load', () => {
+            initGlobe();
+            initCharts();
+            
+            // 添加面板加载动画
+            document.querySelectorAll('.panel').forEach((panel, index) => {
+                setTimeout(() => {
+                    panel.style.opacity = '1';
+                    panel.style.transform = 'translateY(0)';
+                }, 200 * index);
+                
+                // 初始状态
+                panel.style.opacity = '0';
+                panel.style.transform = 'translateY(20px)';
+                panel.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+        });
+    </script>
+</body>
+</html>

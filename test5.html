@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工业环境监测大屏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #0c1a2e, #0a1128);
+            color: #e0f7ff;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 头部标题样式 */
+        .header {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            position: relative;
+            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
+        }
+        
+        .title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a3d5ff;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        
+        /* 传感器卡片容器 */
+        .sensor-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            height: 200px;
+            gap: 20px;
+        }
+        
+        /* 传感器卡片样式 */
+        .sensor-card {
+            flex: 1;
+            background: rgba(10, 25, 47, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(64, 224, 208, 0.2);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .sensor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0, 242, 254, 0.3);
+        }
+        
+        .sensor-card.alarm {
+            border: 1px solid #e74c3c;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.3);
+            animation: alarmPulse 1.5s infinite;
+        }
+        
+        .sensor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .sensor-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sensor-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(79, 172, 254, 0.2);
+        }
+        
+        .sensor-status {
+            font-size: 0.9rem;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .sensor-status.alarm {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .sensor-data {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        
+        .sensor-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .sensor-unit {
+            font-size: 1.2rem;
+            color: #a3d5ff;
+            margin-left: 5px;
+        }
+        
+        .sensor-location {
+            font-size: 1rem;
+            color: #a3d5ff;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .sensor-history {
+            margin-top: 15px;
+            height: 50px;
+        }
+        
+        /* 主监控区域 */
+        .main-monitor {
+            flex: 1;
+            background: rgba(10, 25, 47, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .monitor-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .monitor-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4facfe;
+        }
+        
+        .monitor-controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .control-btn {
+            padding: 8px 20px;
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(79, 172, 254, 0.4);
+        }
+        
+        .monitor-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .thermal-display {
+            width: 80%;
+            height: 80%;
+            background: linear-gradient(45deg, #000, #0c1a2e);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(79, 172, 254, 0.3);
+        }
+        
+        .thermal-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(64, 224, 208, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(64, 224, 208, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .thermal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+        }
+        
+        .hotspot {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 100, 0, 0.8) 0%, rgba(255, 50, 0, 0) 70%);
+            filter: blur(5px);
+            animation: hotspotPulse 3s infinite;
+        }
+        
+        .hotspot-label {
+            position: absolute;
+            color: #ff3300;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        /* 底部状态栏 */
+        .status-bar {
+            background: rgba(10, 25, 47, 0.8);
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(64, 224, 208, 0.2);
+            font-size: 0.9rem;
+            color: #a3d5ff;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+        
+        .update-info {
+            display: flex;
+            gap: 20px;
+        }
+        
+        /* 动画效果 */
+        @keyframes alarmPulse {
+            0% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.3); }
+        }
+        
+        @keyframes hotspotPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        /* 装饰元素 */
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .corner-tl {
+            top: 10px;
+            left: 10px;
+            border-top: 3px solid #00f2fe;
+            border-left: 3px solid #00f2fe;
+        }
+        
+        .corner-tr {
+            top: 10px;
+            right: 10px;
+            border-top: 3px solid #00f2fe;
+            border-right: 3px solid #00f2fe;
+        }
+        
+        .corner-bl {
+            bottom: 10px;
+            left: 10px;
+            border-bottom: 3px solid #00f2fe;
+            border-left: 3px solid #00f2fe;
+        }
+        
+        .corner-br {
+            bottom: 10px;
+            right: 10px;
+            border-bottom: 3px solid #00f2fe;
+            border-right: 3px solid #00f2fe;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1600px) {
+            .sensor-card {
+                padding: 15px;
+            }
+            
+            .sensor-name {
+                font-size: 1.2rem;
+            }
+            
+            .sensor-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .sensor-container {
+                flex-wrap: wrap;
+                height: auto;
+            }
+            
+            .sensor-card {
+                flex: 0 0 calc(33.333% - 15px);
+                margin-bottom: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sensor-card {
+                flex: 0 0 calc(50% - 10px);
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">工业环境监测平台</h1>
+            <div class="subtitle">实时气体浓度与热力分布监控系统</div>
+        </div>
+        
+        <div class="sensor-container">
+            <!-- 甲烷传感器 -->
+            <div class="sensor-card">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <span>甲烷浓度</span>
+                    </div>
+                    <div class="sensor-status">正常</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">0.8</span>
+                        <span class="sensor-unit">%LEL</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域A-反应罐</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="methaneChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 一氧化碳传感器 -->
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-smog"></i>
+                        </div>
+                        <span>一氧化碳</span>
+                    </div>
+                    <div class="sensor-status">正常</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">12</span>
+                        <span class="sensor-unit">ppm</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域B-燃烧室</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="coChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 烟雾传感器 -->
+            <div class="sensor-card alarm">
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-fire-extinguisher"></i>
+                        </div>
+                        <span>烟雾浓度</span>
+                    </div>
+                    <div class="sensor-status alarm">报警</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">3.2</span>
+                        <span class="sensor-unit">%obs/m</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域C-配电室</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="smokeChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 粉尘传感器 -->
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <span>粉尘浓度</span>
+                    </div>
+                    <div class="sensor-status">正常</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">1.8</span>
+                        <span class="sensor-unit">mg/m³</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域D-研磨区</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="dustChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 热像仪 -->
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-thermometer-full"></i>
+                        </div>
+                        <span>热像仪</span>
+                    </div>
+                    <div class="sensor-status">正常</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">85</span>
+                        <span class="sensor-unit">°C</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域E-电机组</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="thermalChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 氧气传感器 -->
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <div class="sensor-name">
+                        <div class="sensor-icon">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <span>氧气浓度</span>
+                    </div>
+                    <div class="sensor-status">正常</div>
+                </div>
+                
+                <div class="sensor-data">
+                    <div>
+                        <span class="sensor-value">20.5</span>
+                        <span class="sensor-unit">%</span>
+                    </div>
+                    <div class="sensor-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>区域F-控制室</span>
+                    </div>
+                </div>
+                
+                <div class="sensor-history">
+                    <canvas id="oxygenChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-monitor">
+            <div class="monitor-header">
+                <div class="monitor-title">
+                    <i class="fas fa-video"></i> 热力分布实时监控
+                </div>
+                <div class="monitor-controls">
+                    <button class="control-btn"><i class="fas fa-expand"></i> 全屏</button>
+                    <button class="control-btn"><i class="fas fa-sync"></i> 刷新</button>
+                    <button class="control-btn"><i class="fas fa-cog"></i> 设置</button>
+                </div>
+            </div>
+            
+            <div class="monitor-content">
+                <div class="thermal-display">
+                    <div class="thermal-grid"></div>
+                    <div class="thermal-overlay"></div>
+                    
+                    <!-- 热力点 -->
+                    <div class="hotspot" style="top: 30%; left: 25%;"></div>
+                    <div class="hotspot-label" style="top: 28%; left: 26%;">电机组 85°C</div>
+                    
+                    <div class="hotspot" style="top: 60%; left: 50%; width: 60px; height: 60px;"></div>
+                    <div class="hotspot-label" style="top: 58%; left: 51%;">反应罐 78°C</div>
+                    
+                    <div class="hotspot" style="top: 40%; left: 70%; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255, 50, 0, 0.8) 0%, rgba(255, 50, 0, 0) 70%);"></div>
+                    <div class="hotspot-label" style="top: 38%; left: 71%;">燃烧室 102°C</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="system-status">
+                <div class="status-indicator"></div>
+                <div>系统状态: <span>运行正常</span></div>
+            </div>
+            
+            <div class="update-info">
+                <div>最后更新: <span id="update-time">2023-07-25 14:28:36</span></div>
+                <div>报警状态: <span class="alarm">1个未处理报警</span></div>
+                <div>数据延迟: <span>0.2秒</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).replace(/\//g, '-');
+            
+            document.getElementById('update-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // 模拟传感器数据更新
+        function updateSensorData() {
+            document.querySelectorAll('.sensor-value').forEach(el => {
+                const currentValue = parseFloat(el.textContent);
+                const change = (Math.random() - 0.5) * currentValue * 0.05;
+                const newValue = Math.max(0, currentValue + change).toFixed(1);
+                
+                // 保留一位小数，但如果是整数则不显示小数部分
+                if (newValue.endsWith('.0')) {
+                    el.textContent = newValue.split('.')[0];
+                } else {
+                    el.textContent = newValue;
+                }
+            });
+        }
+        
+        setInterval(updateSensorData, 3000);
+        
+        // 初始化传感器历史图表
+        function initSensorCharts() {
+            const charts = [
+                { id: 'methaneChart', color: '#4facfe', label: '甲烷浓度 (%LEL)' },
+                { id: 'coChart', color: '#ff9a76', label: '一氧化碳 (ppm)' },
+                { id: 'smokeChart', color: '#e74c3c', label: '烟雾浓度 (%obs/m)' },
+                { id: 'dustChart', color: '#9b59b6', label: '粉尘浓度 (mg/m³)' },
+                { id: 'thermalChart', color: '#ff3300', label: '温度 (°C)' },
+                { id: 'oxygenChart', color: '#2ecc71', label: '氧气浓度 (%)' }
+            ];
+            
+            charts.forEach(chart => {
+                const ctx = document.getElementById(chart.id).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 10}, (_, i) => i + 1),
+                        datasets: [{
+                            label: chart.label,
+                            data: Array.from({length: 10}, () => Math.random() * 100),
+                            borderColor: chart.color,
+                            backgroundColor: `${chart.color}20`,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        },
+                        scales: {
+                            x: {
+                                display: false,
+                                grid: { display: false }
+                            },
+                            y: {
+                                display: false,
+                                grid: { display: false },
+                                min: 0,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        
+        // 初始化页面
+        window.addEventListener('load', () => {
+            initSensorCharts();
+            
+            // 添加面板加载动画
+            document.querySelectorAll('.sensor-card').forEach((panel, index) => {
+                setTimeout(() => {
+                    panel.style.opacity = '1';
+                    panel.style.transform = 'translateY(0)';
+                }, 100 * index);
+                
+                // 初始状态
+                panel.style.opacity = '0';
+                panel.style.transform = 'translateY(20px)';
+                panel.style.transition = 'opacity 0.5s, transform 0.5s';
+            });
+            
+            // 热力点动画
+            setInterval(() => {
+                document.querySelectorAll('.hotspot').forEach(hotspot => {
+                    const size = 60 + Math.random() * 40;
+                    hotspot.style.width = `${size}px`;
+                    hotspot.style.height = `${size}px`;
+                });
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
