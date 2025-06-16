@@ -39,7 +39,7 @@ function initSensorCharts() {
             data: Array.from({ length: 10 }, () => Math.random() * 100),
             borderColor: chart.color,
             backgroundColor: `${chart.color}20`,
-            borderWidth: 2,
+            borderWidth: 1,
             pointRadius: 0,
             tension: 0.4,
             fill: true,
@@ -85,5 +85,18 @@ window.addEventListener("load", () => {
     panel.style.opacity = "0";
     panel.style.transform = "translateY(20px)";
     panel.style.transition = "opacity 0.5s, transform 0.5s";
+  });
+
+  const tempSensorCard = document.getElementById('tempSensorCard');
+  const coalSensorCard = document.getElementById('coalSensorCard');
+  tempSensorCard.addEventListener('mouseenter', () => {
+    tempSensorCard.classList.add('active');
+    coalSensorCard.classList.remove('active');
+    window.__coalShed__ && window.__coalShed__.changeColor(true);
+  });
+  coalSensorCard.addEventListener('mouseenter', () => {
+    coalSensorCard.classList.add('active');
+    tempSensorCard.classList.remove('active');
+    window.__coalShed__ && window.__coalShed__.changeColor(false);
   });
 });
