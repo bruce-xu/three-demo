@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数字孪生·煤场可视化</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles/style.css" />
+  <link rel="stylesheet" href="/styles/sensor.css" />
+  <script type="module" crossorigin src="/assets/index-txqCAYUg.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="wrapper">
+      <div class="title">数字孪生·煤场可视化</div>
+
+      <div class="sensor-container">
+        <!-- 甲烷传感器 -->
+        <div class="sensor-card" id="ch4SensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-fire"></i>
+              </div>
+              <span>甲烷浓度</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">0.8</span>
+            <span class="sensor-unit">%LEL</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="methaneChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 一氧化碳传感器 -->
+        <div class="sensor-card" id="coSensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-smog"></i>
+              </div>
+              <span>一氧化碳</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">12</span>
+            <span class="sensor-unit">ppm</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="coChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 烟雾传感器 -->
+        <div class="sensor-card" id="smokeSensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-fire-extinguisher"></i>
+              </div>
+              <span>烟雾浓度</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">3.2</span>
+            <span class="sensor-unit">%obs/m</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="smokeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 粉尘传感器 -->
+        <div class="sensor-card" id="dustSensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-wind"></i>
+              </div>
+              <span>粉尘浓度</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">1.8</span>
+            <span class="sensor-unit">mg/m³</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="dustChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 热像仪 -->
+        <div class="sensor-card" id="tempSensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-thermometer-full"></i>
+              </div>
+              <span>热像仪</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">85</span>
+            <span class="sensor-unit">°C</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="thermalChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 盘煤仪 -->
+        <div class="sensor-card active" id="coalSensorCard">
+          <div class="sensor-header">
+            <div class="sensor-name">
+              <div class="sensor-icon">
+                <i class="fas fa-lungs"></i>
+              </div>
+              <span>盘煤仪</span>
+            </div>
+            <div class="sensor-status">正常</div>
+            <div class="sensor-status-alarm">报警</div>
+          </div>
+
+          <div class="sensor-data">
+            <span class="sensor-value">5000</span>
+            <span class="sensor-unit">t</span>
+          </div>
+
+          <div class="sensor-history">
+            <canvas id="oxygenChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-area" id="app"></div>
+
+      <div class="mock">
+        <div class="btn" id="ch4Btn">模拟甲烷异常</div>
+        <div class="btn" id="coBtn">模拟一氧化碳异常</div>
+        <div class="btn" id="smokeBtn">模拟烟雾异常</div>
+        <div class="btn" id="dustBtn">模拟粉尘异常</div>
+        <div class="btn" id="tempBtn">模拟温度异常</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/libs/chart.js"></script>
+</body>
+
+</html>

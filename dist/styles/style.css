@@ -1,0 +1,156 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.btn {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  font-size: 12px;
+  background-color: #1a1a1a;
+  color: #fff;
+}
+.btn:hover {
+  border-color: #646cff;
+}
+.btn:focus,
+.btn:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+}
+
+
+#app {
+  flex: 1;
+}
+
+
+.mock {
+  position: fixed;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  gap: 12px;
+}
+
+.mock .btn.active {
+  background-color: red;
+}
+
+
+
+
+
+
+
+
+
+
+/* 
+.container {
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.wrapper {
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 30px #00ffffaa;
+  border-radius: 20px;
+  height: 100%;
+}
+
+.title {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: #00eaff;
+  text-shadow: 0 0 10px #00eaffaa;
+}
+
+.content-area {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px dashed #00ffff55;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.info-area {
+  display: flex;
+  justify-content: space-evenly;
+  position: relative;
+  z-index: 2;
+  padding: 10px;
+  gap: 10px;
+}
+
+.info-box {
+  width: 220px;
+  height: 100px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid #00ffff44;
+  border-radius: 8px;
+  box-shadow: 0 0 12px #00ffff33 inset;
+  color: #00ffff;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.info-box.top-left { top: 50px; left: 50px; }
+.info-box.top-right { top: 50px; right: 50px; }
+.info-box.bottom-left { bottom: 50px; left: 50px; }
+.info-box.bottom-right { bottom: 50px; right: 50px; } */
