@@ -16,7 +16,7 @@ export default class BucketWheelMachine {
       const group = new THREE.Group();
 
       const loader = new THREE.TextureLoader();
-      loader.load('/imgs/machine.png', function (texture) {
+      loader.load('imgs/machine.png', function (texture) {
         const geometry = new THREE.PlaneGeometry(30, 20);
         const material = new THREE.MeshStandardMaterial({
           map: texture,

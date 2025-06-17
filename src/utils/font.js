@@ -9,7 +9,7 @@ export function loadFont() {
     const loader = new FontLoader();
     
     loader.load(
-      "/fonts/gentilis_bold.typeface.json",
+      "fonts/gentilis_bold.typeface.json",
       (font) => {
         fontCache = font; // Cache the loaded font
         resolve(font);

@@ -98,7 +98,7 @@ export default class CoalShed {
         group.add(beam);
 
         const loader = new THREE.TextureLoader();
-        loader.load("/imgs/track.png", function (texture) {
+        loader.load("imgs/track.png", function (texture) {
           const geometry = new THREE.PlaneGeometry(196, 4);
           const material = new THREE.MeshBasicMaterial({
             map: texture,
