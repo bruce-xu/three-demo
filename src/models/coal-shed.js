@@ -42,11 +42,11 @@ export default class CoalShed {
   init() {
     return new Promise((resolve) => {
       Promise.all([
-        loadPointCloud("/three-demo/data/coal_pile_1.ply", COLORS[0]),
-        loadPointCloud("/three-demo/data/coal_pile_2.ply", COLORS[1]),
-        loadPointCloud("/three-demo/data/coal_pile_3.ply", COLORS[2]),
-        loadPointCloud("/three-demo/data/coal_pile_4.ply", COLORS[3]),
-        loadPointCloud("/three-demo/data/coal_pile_5.ply", COLORS[4]),
+        loadPointCloud("/data/coal_pile_1.ply", COLORS[0]),
+        loadPointCloud("/data/coal_pile_2.ply", COLORS[1]),
+        loadPointCloud("/data/coal_pile_3.ply", COLORS[2]),
+        loadPointCloud("/data/coal_pile_4.ply", COLORS[3]),
+        loadPointCloud("/data/coal_pile_5.ply", COLORS[4]),
       ]).then(([points1, points2, points3, points4, points5]) => {
         this.coalPiles.push(points1, points2, points3, points4, points5);
 
@@ -98,7 +98,7 @@ export default class CoalShed {
         group.add(beam);
 
         const loader = new THREE.TextureLoader();
-        loader.load("/three-demo/imgs/track.png", function (texture) {
+        loader.load("/imgs/track.png", function (texture) {
           const geometry = new THREE.PlaneGeometry(196, 4);
           const material = new THREE.MeshBasicMaterial({
             map: texture,
