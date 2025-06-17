@@ -21,19 +21,3 @@ export function createSensor(type) {
 
   return group;
 }
-
-// export function createSensor(type) {
-//   return new Promise((resolve, reject) => {
-//     const loader = new THREE.TextureLoader();
-//     loader.load('/imgs/sensor.png', function (texture) {
-//       const group = new THREE.Group();
-//       const geometry = new THREE.CircleGeometry(4, 64);
-//       const material = new THREE.MeshStandardMaterial({map: texture, opacity: 1, transparent: true});
-//       const mesh = new THREE.Mesh(geometry, material);
- 
-//       group.add(mesh);
-
-//       resolve(group);
-//     });
-//   });
-// }
